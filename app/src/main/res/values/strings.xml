@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">BCTest</string>
+
+    <string name="chose_key_file_picker">Select key file</string>
 </resources>

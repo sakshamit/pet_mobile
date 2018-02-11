@@ -4,25 +4,60 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     tools:context="bctest.com.bctest.MainActivity"
     tools:layout_editor_absoluteY="81dp"
     android:orientation="vertical">
 
     <TextView
-        android:id="@+id/statusTV"
-        android:layout_width="wrap_content"
+        android:id="@+id/textViewSample"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
+        />
+    <TextView
+        android:text=""
+        android:id="@+id/keyFilePath"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="32dp"
+        android:layout_marginRight="32dp"
+        android:padding="8dp"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center_horizontal"
+        />
+    <Button
+        android:id="@+id/browseButton"
+        android:text="Browse KEY"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="32dp"
+        android:layout_marginRight="32dp"
+        android:padding="8dp"/>
+
+    <EditText
+        android:id="@+id/passwordTV"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="32dp"
+        android:layout_marginLeft="32dp"
+        android:padding="8dp"
+        android:hint="Password"
+        android:inputType="textPassword"
         tools:layout_editor_absoluteX="154dp"
         tools:layout_editor_absoluteY="247dp"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center_horizontal"
         />
 
     <Button
         android:id="@+id/buttonAdopt"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Adopt on Blockchain"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginRight="32dp"
+        android:layout_marginLeft="32dp"
+        android:padding="8dp"
         tools:layout_editor_absoluteX="101dp"
         tools:layout_editor_absoluteY="182dp" />
 
