@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import org.web3j.abi.datatypes.Address;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
@@ -35,6 +36,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.ArrayList;
+import java.util.List;
 
 
 import lib.folderpicker.FolderPicker;
@@ -82,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
                     Snackbar.make(view.getRootView(), "Password is empty.", Snackbar.LENGTH_LONG);
                     return;
                 }
-                new GetAdooptersTask().execute();
+                //new GetAdooptersTask().execute();
                 new DOBCWorkTask().execute();
             }
         });
@@ -124,9 +126,18 @@ public class MainActivity extends AppCompatActivity {
             Adoption_sol_Adoption adoptionSolAdoption = getAdoptionSol();
             if(adoptionSolAdoption!=null){
                 try {
-                    String adopter = adoptionSolAdoption.adopters(BigInteger.valueOf(1l)).send();
-                    Log.d(TAG, "adopter of 1l : " + adopter);
+                    Log.d(TAG, "calling  adoptionSolAdoption.getAdopters()");
+                    List<Address> adopters = adoptionSolAdoption.getAdopters().send();
+                    if(adopters!=null){
+                        Log.d(TAG, "adopters size : " + adopters.size());
+                        for(Address adopter : adopters){
+                            Log.d(TAG, "adopter : " + adopter.toString());
+                        }
+                    }else{
+                        Log.d(TAG, "adopers list is null");
+                    }
                 } catch (Exception e) {
+                    Log.d(TAG, "some exception in adoptionSolAdoption.getAdopters()");
                     e.printStackTrace();
                 }
             }

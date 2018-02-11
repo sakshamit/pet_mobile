@@ -36,14 +36,14 @@ public class Adoption_sol_Adoption extends Contract {
         super(BINARY, contractAddress, web3j, transactionManager, gasPrice, gasLimit);
     }
 
-    /*public RemoteCall<List<String>> getAdopters() {
+    public RemoteCall<List> getAdopters() {
         Function function = new Function("getAdopters",
                 Arrays.<Type>asList(), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<StaticArray16<Address>>() {}));
-        //return executeRemoteCallSingleValueReturn(function, List<String>.class);
-        return executeRemoteCallSingleValueReturn(function, );
+        return executeRemoteCallSingleValueReturn(function, List.class);
+        //return executeRemoteCallSingleValueReturn(function, );
         //return executeRemoteCallSingleValueReturn()
-    }*/
+    }
 
     public RemoteCall<String> adopters(BigInteger param0) {
         Function function = new Function("adopters", 
