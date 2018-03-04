@@ -24,6 +24,7 @@ import org.web3j.protocol.core.methods.response.EthGetBalance;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.core.methods.response.Web3ClientVersion;
 import org.web3j.protocol.http.HttpService;
+import org.web3j.tuples.generated.Tuple3;
 import org.web3j.tx.Contract;
 import org.web3j.utils.Convert;
 
@@ -45,17 +46,11 @@ import static org.web3j.tx.ManagedTransaction.GAS_PRICE;
 
 public class MainActivity extends AppCompatActivity {
 
-    final static String PRIVATE_KEY = "0xbe4520597951c900e5f51fa94293c6eb7f439499bba7f15937e3fec9cdd893ba";
-    final static String PUBLIC_KEY = "0xF917bB3aC69b2aaCb12F8B9D8926B9B5130A01B5";
     final static String CONTRACT_ADDRESS = "0xA164B12c1D4D287Fc155F48AB549B7Ad369b1688";
-    final static String PASSWORD = "grihsobha";
-
+    final static String CONTRACT_ADDRESS_NEW = "0xff0397a6c675096576e163e992f16158baf8d194";
 
     public static String infuraTestRinkebyUrl = "https://rinkeby.infura.io/wFIm9wRQ6plphHy3rN9P ";
-
     final static int BROWSE_REQUEST_CODE = 1001;
-
-    //final static BigInteger GAS_PRICE = new BigInteger();
     final static String TAG = "bc_dev";
 
     TextView filePathTV;
@@ -72,20 +67,26 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Log.d(TAG, "doing something awesome");
-                if(!new File(keyPath).exists()){
-                    Log.d(TAG, "Key file does not exist");
+                keyPath  = "/storage/emulated/0/Download/key_file.json";
+                File keyFile = new File(keyPath);
+                if(!keyFile.exists()){
+                    Log.d(TAG, "Key file does not exist " + keyPath);
                     Snackbar.make(view.getRootView(), "Path is wrong.", Snackbar.LENGTH_LONG);
                     return;
+                }else{
+
                 }
                 TextView passwordTV = (findViewById(R.id.passwordTV));
                 keyPassword = passwordTV.getText().toString();
+                keyPassword = "grihsobha";
                 if(keyPassword.isEmpty()){
                     Log.d(TAG, "Password is empty");
                     Snackbar.make(view.getRootView(), "Password is empty.", Snackbar.LENGTH_LONG);
                     return;
                 }
                 //new GetAdooptersTask().execute();
-                new DOBCWorkTask().execute();
+                //new DOBCWorkTask().execute();
+                new GetPets().execute();
             }
         });
 
@@ -95,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this, FolderPicker.class);
                 intent.putExtra("pickFiles", true);
-                intent.putExtra("location", Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath());
+                //intent.putExtra("location", Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath());
                 intent.putExtra("title", "Select key file");
                 startActivityForResult(intent, BROWSE_REQUEST_CODE);
 
@@ -117,6 +118,34 @@ public class MainActivity extends AppCompatActivity {
             filePathTV.setText(keyPath);
         }
 
+    }
+
+    class GetPets extends  AsyncTask<Void, Void, Void>{
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            Adoption adoption = getAdoptionContractNew();
+            if(adoption!=null){
+                try {
+                    Log.d(TAG, "calling  adoptionSolAdoption.getAdopters()");
+                    Tuple3<String, BigInteger, String> tuple3 = adoption.pets(BigInteger.valueOf(0l)).send();
+                    if(tuple3!=null){
+                        Log.d(TAG, tuple3.getValue1().toString() + tuple3.getValue2().toString() + tuple3.getValue3().toString() + "");
+                    }else{
+                        Log.d(TAG, "adopers list is null");
+                    }
+                } catch (Exception e) {
+                    Log.d(TAG, "some exception in adoptionSolAdoption.getAdopters()");
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+        }
     }
 
     class GetAdooptersTask extends AsyncTask<Void, Void, Void>{
@@ -150,6 +179,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
     class DOBCWorkTask  extends AsyncTask<Void, Void, Void>{
         @Override
         protected Void doInBackground(Void... voids) {
@@ -175,15 +205,37 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private Adoption getAdoptionContractNew(){
+
+        Web3j web3j = Web3jFactory.build(new HttpService(infuraTestRinkebyUrl));
+        //browse field to upload from user.
+        File file = new File(keyPath);
+        if(file.exists()){
+            Log.d(TAG, "file exists");
+        }else{
+            Log.d(TAG, "file does not exists");
+        }
+
+        Credentials credentials = null;
+        try {
+            keyPassword = "grihsobha";
+            credentials = WalletUtils.loadCredentials(keyPassword, file);
+        } catch (IOException e) {
+            Log.d(TAG, "Credential io exception : " + keyPassword);
+            e.printStackTrace();
+        } catch (CipherException e) {
+            Log.d(TAG, "Cipher exception " + keyPassword);
+            e.printStackTrace();
+        }
+        if(credentials!=null){
+            Adoption adoption = Adoption.load(CONTRACT_ADDRESS_NEW, web3j, credentials, GAS_PRICE, Contract.GAS_LIMIT);
+            return adoption;
+        }
+        return null;
+
+    }
     private Adoption_sol_Adoption getAdoptionSol(){
         Web3j web3j = Web3jFactory.build(new HttpService(infuraTestRinkebyUrl));
-        /*try {
-            EthGetBalance ethGetBalance = web3j.ethGetBalance(PUBLIC_KEY, DefaultBlockParameterName.LATEST).send();
-            Log.d(TAG, "balance : " + ethGetBalance.getBalance());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
-
         //browse field to upload from user.
         File file = new File(keyPath);
         if(file.exists()){
