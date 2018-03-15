@@ -1,11 +1,12 @@
 package bctest.com.bctest;
 
+import android.Manifest;
 import android.content.Intent;
-import android.content.res.AssetFileDescriptor;
-import android.net.Uri;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
-import android.os.Environment;
+import android.os.Build;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,24 +20,14 @@ import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.Web3jFactory;
-import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.protocol.core.methods.response.EthGetBalance;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.web3j.protocol.core.methods.response.Web3ClientVersion;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tuples.generated.Tuple3;
 import org.web3j.tx.Contract;
-import org.web3j.utils.Convert;
 
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -51,42 +42,50 @@ public class MainActivity extends AppCompatActivity {
 
     public static String infuraTestRinkebyUrl = "https://rinkeby.infura.io/wFIm9wRQ6plphHy3rN9P ";
     final static int BROWSE_REQUEST_CODE = 1001;
-    final static String TAG = "bc_dev";
+    final static int PERMISSION_CODE = 1002;
+    public final static String TAG = "bc_dev";
 
     TextView filePathTV;
     String keyPath = "";
     String keyPassword = "";
 
+    private void askForPermissionIfApplicable(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                String[] permissions = new String[]{Manifest.permission.READ_EXTERNAL_STORAGE};
+                requestPermissions(permissions, 101);
+            }
+        }
+    }
+
+    private void listPets(View view){
+        File keyFile = new File(keyPath);
+        if(!keyFile.exists()){
+            Log.d(TAG, "Key file does not exist " + keyPath);
+            Snackbar.make(view.getRootView(), "Path is wrong.", Snackbar.LENGTH_LONG);
+            return;
+        }
+        TextView passwordTV = (findViewById(R.id.passwordTV));
+        keyPassword = passwordTV.getText().toString();
+        if(keyPassword.isEmpty()){
+            Log.d(TAG, "Password is empty");
+            Snackbar.make(view.getRootView(), "Password is empty.", Snackbar.LENGTH_LONG);
+            return;
+        }
+        //new GetAdooptersTask().execute();
+        //new DOBCWorkTask().execute();
+        new GetPets().execute();
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        askForPermissionIfApplicable();
         Button buttonAdopt = findViewById(R.id.buttonAdopt);
         buttonAdopt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d(TAG, "doing something awesome");
-                keyPath  = "/storage/emulated/0/Download/key_file.json";
-                File keyFile = new File(keyPath);
-                if(!keyFile.exists()){
-                    Log.d(TAG, "Key file does not exist " + keyPath);
-                    Snackbar.make(view.getRootView(), "Path is wrong.", Snackbar.LENGTH_LONG);
-                    return;
-                }else{
-
-                }
-                TextView passwordTV = (findViewById(R.id.passwordTV));
-                keyPassword = passwordTV.getText().toString();
-                keyPassword = "grihsobha";
-                if(keyPassword.isEmpty()){
-                    Log.d(TAG, "Password is empty");
-                    Snackbar.make(view.getRootView(), "Password is empty.", Snackbar.LENGTH_LONG);
-                    return;
-                }
-                //new GetAdooptersTask().execute();
-                //new DOBCWorkTask().execute();
-                new GetPets().execute();
+                listPets(view);
             }
         });
 
@@ -117,22 +116,22 @@ public class MainActivity extends AppCompatActivity {
             Log.i( TAG, keyPath + " exists : " + (new File(keyPath)).exists());
             filePathTV.setText(keyPath);
         }
-
     }
 
     class GetPets extends  AsyncTask<Void, Void, Void>{
-
         @Override
         protected Void doInBackground(Void... voids) {
             Adoption adoption = getAdoptionContractNew();
             if(adoption!=null){
                 try {
                     Log.d(TAG, "calling  adoptionSolAdoption.getAdopters()");
-                    Tuple3<String, BigInteger, String> tuple3 = adoption.pets(BigInteger.valueOf(0l)).send();
-                    if(tuple3!=null){
-                        Log.d(TAG, tuple3.getValue1().toString() + tuple3.getValue2().toString() + tuple3.getValue3().toString() + "");
-                    }else{
-                        Log.d(TAG, "adopers list is null");
+                    for(int i=0;i<10;i++){
+                        Tuple3<String, BigInteger, String> tuple3 = adoption.pets(BigInteger.valueOf(i)).send();
+                        if(tuple3!=null){
+                            Log.i(TAG, tuple3.getValue1().toString() + tuple3.getValue2().toString() + tuple3.getValue3().toString() + "");
+                        }else{
+                            Log.i(TAG, "adopers list is null");
+                        }
                     }
                 } catch (Exception e) {
                     Log.d(TAG, "some exception in adoptionSolAdoption.getAdopters()");
@@ -210,6 +209,7 @@ public class MainActivity extends AppCompatActivity {
         Web3j web3j = Web3jFactory.build(new HttpService(infuraTestRinkebyUrl));
         //browse field to upload from user.
         File file = new File(keyPath);
+
         if(file.exists()){
             Log.d(TAG, "file exists");
         }else{
@@ -218,7 +218,6 @@ public class MainActivity extends AppCompatActivity {
 
         Credentials credentials = null;
         try {
-            keyPassword = "grihsobha";
             credentials = WalletUtils.loadCredentials(keyPassword, file);
         } catch (IOException e) {
             Log.d(TAG, "Credential io exception : " + keyPassword);

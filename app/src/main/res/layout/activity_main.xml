@@ -53,12 +53,19 @@
         android:id="@+id/buttonAdopt"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Adopt on Blockchain"
+        android:text="List Pets"
         android:layout_gravity="center_horizontal"
         android:layout_marginRight="32dp"
         android:layout_marginLeft="32dp"
         android:padding="8dp"
         tools:layout_editor_absoluteX="101dp"
         tools:layout_editor_absoluteY="182dp" />
+    <ProgressBar
+        android:id="@+id/listProgress"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_gravity="center_horizontal"
+        android:visibility="gone"/>
+    
 
 </LinearLayout>
